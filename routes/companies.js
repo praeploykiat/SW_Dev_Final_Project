@@ -29,7 +29,7 @@
 
 const express = require('express');
 const {protect,authorize} = require('../middleware/auth');
-const {getCompanies,getCompany,createCompany,updateCompany,deleteCompany} = require('../controller/companies');
+const {getCompanies,getCompany,createCompany,updateCompany,deleteCompany, updateMaxSlots} = require('../controller/companies');
 
 
 //include other resource routers
@@ -39,6 +39,8 @@ const router = express.Router();
 
 //Re-route into other resource routers
 router.use('/:companyId/bookings/',bookingRouter);
+// Add this new route for updating max slots
+router.route('/:id/slots').put(protect, authorize('admin'), updateMaxSlots);
 
 router.route('/').get(getCompanies).post(protect,authorize('admin'),createCompany);
 router.route('/:id').get(getCompany).put(protect,authorize('admin'),updateCompany).delete(protect,authorize('admin'),deleteCompany);

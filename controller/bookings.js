@@ -6,7 +6,7 @@ const Company = require('../models/Company');
 //access private
 exports.getBookings = async(req,res,next)=>{
     let query;
-    //General users can see only thaeir own appts!
+    //General users can see only their own appts!
     if(req.user.role !== 'admin'){
         query=Booking.find({user:req.user.id}).populate({path:'company',select:'name province tel'});
     }
@@ -61,7 +61,11 @@ exports.addBooking = async (req,res,next) => {
         if(!company){
             return res.status(404).json({success:false,msg:`No company with the id of ${req.params.companyId}`});
         }
-
+        // Check if the company has reached its maximum slots
+        const companyBookingsCount = await Booking.countDocuments({ company: req.params.companyId });
+        if(companyBookingsCount > company.maxSlots){
+            return res.status(400).json({success: false, msg: `Company ${company.name} has reached its maximum number of interview slots`});
+        }
         //add user id to req.body
         req.body.user=req.user.id;
         //check for existed appt
@@ -69,6 +73,18 @@ exports.addBooking = async (req,res,next) => {
         //if the user is not an admin,they can create only 3 appts
         if(existedBooking.length>=3&&req.user.role !== 'admin'){
             return res.status(400).json({success:false,msg:`The user with ID ${req.user.id} has already made 3 bookings`});
+        }
+        //Check if the same date is already booked for this company
+        const existingAppointment = await Booking.findOne({
+            company: req.params.companyId,
+            apptDate: new Date(req.body.apptDate)
+        });
+        
+        if(existingAppointment) {
+            return res.status(400).json({
+                success: false,
+                msg: `An appointment for ${company.name} on this date and time already exists`
+            });
         }
         const booking = await Booking.create(req.body);
 

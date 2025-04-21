@@ -1,0 +1,34 @@
+### Login to get a token
+POST http://localhost:5000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "johndoe@gmail.com",
+  "password": "12345678"
+}
+### Create a new company
+POST http://localhost:5000/api/v1/companies
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MDYyNzBlMThhMTExYzE2N2YzNDQzZiIsImlhdCI6MTc0NTI0NjQwMywiZXhwIjoxNzQ3ODM4NDAzfQ.ia9zA03juN1nkA155iScuUtCfxqMmvptTkEarfU6rVQ
+
+{
+  "name": "Test Company",
+  "address": "123 Test Street",
+  "district": "Test District",
+  "province": "Test Province",
+  "postalcode": "12345",
+  "tel": "0812345678",
+  "maxSlots": 10
+}
+
+### Create a booking
+POST http://localhost:5000/api/v1/companies/company_id_here/bookings
+Content-Type: application/json
+Authorization: Bearer your_token_here
+
+{
+  "apptDate": "2022-05-12T14:00:00.000Z"
+}
+
+### Get all companies
+GET http://localhost:5000/api/v1/companies

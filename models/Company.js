@@ -29,6 +29,17 @@ const CompanySchema = new mongoose.Schema({
     tel:{
         type:String,
     },
+    maxSlots: {
+        type: Number,
+        required: [true, 'Please add the maximum number of interview slots'],
+        default: 10,
+        validate: {
+            validator: function(val) {
+                return val > 0;
+            },
+            message: 'Maximum slots must be a positive number'
+        }
+    },
     // region:{
     //     type:String,
     //     required:[true,'Please add a region']
