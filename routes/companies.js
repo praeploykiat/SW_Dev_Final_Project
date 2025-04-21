@@ -33,12 +33,12 @@ const {getCompanies,getCompany,createCompany,updateCompany,deleteCompany} = requ
 
 
 //include other resource routers
-const appointmentRouter = require('./appointments');
+const bookingRouter = require('./bookings');
 
 const router = express.Router();
 
 //Re-route into other resource routers
-router.use('/:companyId/appointments/',appointmentRouter);
+router.use('/:companyId/bookings/',bookingRouter);
 
 router.route('/').get(getCompanies).post(protect,authorize('admin'),createCompany);
 router.route('/:id').get(getCompany).put(protect,authorize('admin'),updateCompany).delete(protect,authorize('admin'),deleteCompany);

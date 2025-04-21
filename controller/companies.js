@@ -21,7 +21,7 @@ exports.getCompanies = async (req,res,next) => {
         queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g,match=>`$${match}`);
 
         //finding resourse
-        query = Company.find(JSON.parse(queryStr)).populate('appointments');
+        query = Company.find(JSON.parse(queryStr)).populate('bookings');
 
         //Select fields
         if(req.query.select){
