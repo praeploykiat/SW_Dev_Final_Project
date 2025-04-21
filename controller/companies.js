@@ -1,5 +1,3 @@
-const { json } = require('express');
-const Company = require('../models/Company');
 const Company = require('../models/Company');
 
 exports.getCompanies = async (req,res,next) => {
@@ -119,4 +117,3 @@ exports.deleteCompany = async (req,res,next) => {
         res.status(400).json({success:false});
     }
 };
-
