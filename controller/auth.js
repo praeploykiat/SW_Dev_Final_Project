@@ -6,11 +6,16 @@ const User = require('../models/User');
 
 exports.register = async (req,res,next) => {
     try {
-        const {name,email,password,role} = req.body;
+        // Make sure you're extracting the telephone field
+        const { name, email, password, telephone, role } = req.body;
         //create user to db
         const user = await User.create({
-            name,email,password,role
-        });
+            name,
+            email,
+            password,
+            telephone, // Make sure this is included
+            role
+          });
         //res.status(200).json({success:true});
 
         //create token
