@@ -1,4 +1,3 @@
-const { json } = require('express');
 const Company = require('../models/Company');
 
 exports.getCompanies = async (req,res,next) => {
@@ -88,7 +87,7 @@ exports.getCompany = async (req,res,next) => {
 
 exports.createCompany = async (req,res,next) => {
     //console.log(req.body);
-    const company = await Company.create(req.body);
+    const company = await Compamy.create(req.body);
     res.status(201).json({success:true,data:company});
 };
 
