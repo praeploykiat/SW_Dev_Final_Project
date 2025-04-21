@@ -11,9 +11,9 @@ exports.getAppointments = async(req,res,next)=>{
         query=Appointment.find({user:req.user.id}).populate({path:'company',select:'name province tel'});
     }
     else{//If you are an admin, you can see all!
-        if(req.params.company){
-            console.log(req.params.company);
-            query = Appointment.find({company:req.params.company}).populate({path:'company',select:'name province tel'});
+        if(req.params.companyId){
+            console.log(req.params.companyId);
+            query = Appointment.find({company:req.params.companyId}).populate({path:'company',select:'name province tel'});
         }
         else{
             query = Appointment.find().populate({path:'company',select:'name province tel'});
@@ -50,16 +50,16 @@ exports.getAppointment = async (req,res,next) => {
 };
 
 //add single appt
-//post api/v1/companies/:company/appointments/
+//post api/v1/companies/:companyId/appointments/
 //access private
 exports.addAppointment = async (req,res,next) => {
     try{
-        req.body.company=req.params.company;
+        req.body.company=req.params.companyId;
 
-        const company = await Company.findById(req.params.company);
+        const company = await Company.findById(req.params.companyId);
 
         if(!company){
-            return res.status(404).json({success:false,msg:`No company with the id of ${req.params.company}`});
+            return res.status(404).json({success:false,msg:`No company with the id of ${req.params.companyId}`});
         }
 
         //add user id to req.body

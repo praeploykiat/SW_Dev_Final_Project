@@ -29,7 +29,7 @@
 
 const express = require('express');
 const {protect,authorize} = require('../middleware/auth');
-const {getCompanies,getCompany,createCompany,updateCompany,deleteCompany} = require('../controller/Companies');
+const {getCompanies,getCompany,createCompany,updateCompany,deleteCompany} = require('../controller/companies');
 
 
 //include other resource routers

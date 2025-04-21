@@ -40,9 +40,9 @@ const CompanySchema = new mongoose.Schema({
     toObject:{virtuals:true}
 });
 
-//Cascade delete appointments when a Company is deleted
+//Cascade delete appointments when a company is deleted
 CompanySchema.pre('deleteOne',{document:true,query:false},async function(next){
-    console.log(`Appointments being removed from Company ${this._id}`);
+    console.log(`Appointments being removed from company ${this._id}`);
     await this.model('Appointment').deleteMany({Company:this._id});
     next();
 });
@@ -51,7 +51,7 @@ CompanySchema.pre('deleteOne',{document:true,query:false},async function(next){
 CompanySchema.virtual('appointments',{
     ref:'Appointment',
     localField : '_id',
-    foreignField: 'Company',
+    foreignField: 'company',
     justOne:false
 }); 
 
