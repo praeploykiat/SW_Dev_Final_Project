@@ -18,7 +18,6 @@ exports.generateAIResponse = async (req, res) => {
       });
     }
 
-    // Get API key from environment variables
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({
@@ -27,18 +26,13 @@ exports.generateAIResponse = async (req, res) => {
       });
     }
 
-    // Call Gemini API
     const response = await generateContent(apiKey, prompt);
-    const textOutput = extractTextFromResponse(response);
+    let textOutput = extractTextFromResponse(response);
+    
+    //format text 
+    textOutput = formatTextResponse(textOutput);
 
-    // Return the response
-    return res.status(200).json({
-      success: true,
-      data: {
-        text: textOutput,
-        rawResponse: response // Optional, include to expose the full response
-      }
-    });
+    return res.status(200).send(textOutput);
   } catch (error) {
     console.error('AI generation error:', error);
     return res.status(500).json({
@@ -48,3 +42,23 @@ exports.generateAIResponse = async (req, res) => {
     });
   }
 };
+
+/**
+ * Format AI response text
+ * @param {string} text - Raw text from AI response
+ * @returns {string} - Formatted text
+ */
+function formatTextResponse(text) {
+  if (!text) return "No response generated.";
+  
+  // Replace multiple newlines with just two
+  text = text.replace(/\n{3,}/g, '\n\n');
+  
+  // Add proper spacing after punctuation if missing
+  text = text.replace(/([.!?])\s*([A-Z])/g, '$1 $2');
+  
+  // Add horizontal line for separation
+  const separator = '\n' + '-'.repeat(60) + '\n';
+  
+  return separator + text + separator;
+}
