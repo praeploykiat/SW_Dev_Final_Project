@@ -25,29 +25,29 @@ app.use(cookieParser());
 // });
 
 
-// app.get('/api/v1/hospitals',(req,res) => {
-//     res.status(200).json({success:true,msg:'Show all hospitals'});
+// app.get('/api/v1/companies',(req,res) => {
+//     res.status(200).json({success:true,msg:'Show all companies'});
 // });
 
-// app.get('/api/v1/hospitals/:id', (req,res) => {
-//     res.status(200).json({success:true,msg:`Show hospital ${req.params.id}`});
+// app.get('/api/v1/companies/:id', (req,res) => {
+//     res.status(200).json({success:true,msg:`Show company ${req.params.id}`});
 // });
 
-// app.post('/api/v1/hospitals/', (req,res) => {
-//     res.status(200).json({success:true,msg:'Create new Hospital'});
+// app.post('/api/v1/companies/', (req,res) => {
+//     res.status(200).json({success:true,msg:'Create new Company'});
 // });
 
-// app.put('/api/v1/hospitals/:id',(req,res) => {
-//     res.status(200).json({success:true,msg:`Update hospital ${req.params.id}`});
+// app.put('/api/v1/companies/:id',(req,res) => {
+//     res.status(200).json({success:true,msg:`Update company ${req.params.id}`});
 // });
 
-// app.delete('/api/v1/hospitals/:id' , (req,res) => {
-//     res.status(200).json({success:true,msg:`Delete hospital ${req.params.id}`});
+// app.delete('/api/v1/companies/:id' , (req,res) => {
+//     res.status(200).json({success:true,msg:`Delete company ${req.params.id}`});
 // });
 
 //Rout files
-const hospitals = require('./routes/hospitals');
-app.use('/api/v1/hospitals',hospitals);
+const companies = require('./routes/companies');
+app.use('/api/v1/companies',companies);
 
 const auth = require('./routes/auth');
 app.use('/api/v1/auth',auth);

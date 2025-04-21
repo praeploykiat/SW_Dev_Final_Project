@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const HospitalSchema = new mongoose.Schema({
+const CompanySchema = new mongoose.Schema({
     name : {
         type:String,
         required:[true,'Please add name'],
@@ -25,13 +25,14 @@ const HospitalSchema = new mongoose.Schema({
         required:[true,'Please add a postalcode'],
         maxlength:[50,'Postal Code can not be more than 5 digits']
     },
+    
     tel:{
         type:String,
     },
-    region:{
-        type:String,
-        required:[true,'Please add a region']
-    }
+    // region:{
+    //     type:String,
+    //     required:[true,'Please add a region']
+    // }
     
 },
 {
@@ -39,19 +40,19 @@ const HospitalSchema = new mongoose.Schema({
     toObject:{virtuals:true}
 });
 
-//Cascade delete appointments when a hospital is deleted
-HospitalSchema.pre('deleteOne',{document:true,query:false},async function(next){
-    console.log(`Appointments being removed from hospital ${this._id}`);
-    await this.model('Appointment').deleteMany({hospital:this._id});
+//Cascade delete appointments when a Company is deleted
+CompanySchema.pre('deleteOne',{document:true,query:false},async function(next){
+    console.log(`Appointments being removed from Company ${this._id}`);
+    await this.model('Appointment').deleteMany({Company:this._id});
     next();
 });
 
 //Reverse populate with virtuals
-HospitalSchema.virtual('appointments',{
+CompanySchema.virtual('appointments',{
     ref:'Appointment',
     localField : '_id',
-    foreignField: 'hospital',
+    foreignField: 'Company',
     justOne:false
 }); 
 
-module.exports = mongoose.model('Hospital',HospitalSchema);
+module.exports = mongoose.model('Company',CompanySchema);

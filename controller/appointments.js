@@ -1,5 +1,5 @@
 const Appointment = require('../models/Appointment');
-const Hospital = require('../models/Hospital');
+const Company = require('../models/Company');
 
 //get all appts
 //get api/v1/appointments
@@ -8,15 +8,15 @@ exports.getAppointments = async(req,res,next)=>{
     let query;
     //General users can see only thaeir own appts!
     if(req.user.role !== 'admin'){
-        query=Appointment.find({user:req.user.id}).populate({path:'hospital',select:'name province tel'});
+        query=Appointment.find({user:req.user.id}).populate({path:'company',select:'name province tel'});
     }
     else{//If you are an admin, you can see all!
-        if(req.params.hospitalId){
-            console.log(req.params.hospitalId);
-            query = Appointment.find({hospital:req.params.hospitalId}).populate({path:'hospital',select:'name province tel'});
+        if(req.params.company){
+            console.log(req.params.company);
+            query = Appointment.find({company:req.params.company}).populate({path:'company',select:'name province tel'});
         }
         else{
-            query = Appointment.find().populate({path:'hospital',select:'name province tel'});
+            query = Appointment.find().populate({path:'company',select:'name province tel'});
         }
         
     }
@@ -36,7 +36,7 @@ exports.getAppointments = async(req,res,next)=>{
 //access public
 exports.getAppointment = async (req,res,next) => {
     try{
-        const appointment = await Appointment.findById(req.params.id).populate({path:'hospital',select:'name description tel'});
+        const appointment = await Appointment.findById(req.params.id).populate({path:'company',select:'name description tel'});
         if(!appointment){
             return res.status(404).json({success:false,msg:`No appointment with the id of ${req.params.id}`});
         }
@@ -50,16 +50,16 @@ exports.getAppointment = async (req,res,next) => {
 };
 
 //add single appt
-//post api/v1/hospitals/:hospitalId/appointments/
+//post api/v1/companies/:company/appointments/
 //access private
 exports.addAppointment = async (req,res,next) => {
     try{
-        req.body.hospital=req.params.hospitalId;
+        req.body.company=req.params.company;
 
-        const hospital = await Hospital.findById(req.params.hospitalId);
+        const company = await Company.findById(req.params.company);
 
-        if(!hospital){
-            return res.status(404).json({success:false,msg:`No hospital with the id of ${req.params.hospitalId}`});
+        if(!company){
+            return res.status(404).json({success:false,msg:`No company with the id of ${req.params.company}`});
         }
 
         //add user id to req.body
