@@ -2,7 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const cookieParser = require('cookie-parser');
-
+const aiRoutes = require('./routes/aiController');
 //load var
 dotenv.config({path:'./config/config.env'});
 
@@ -14,6 +14,8 @@ const app = express();
 app.use(express.json());
 //cookieparser
 app.use(cookieParser());
+// Mount routers
+app.use('/api/ai', aiRoutes);
 
 // app.get('/',(req,res) => {
 //     //res.send('<h1>Hello from express</h1>');
