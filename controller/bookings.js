@@ -6,7 +6,7 @@ const Company = require('../models/Company');
 //access private
 exports.getBookings = async(req,res,next)=>{
     let query;
-    //General users can see only thaeir own appts!
+    //General users can see only their own appts!
     if(req.user.role !== 'admin'){
         query=Booking.find({user:req.user.id}).populate({path:'company',select:'name province tel'});
     }
@@ -61,7 +61,11 @@ exports.addBooking = async (req,res,next) => {
         if(!company){
             return res.status(404).json({success:false,msg:`No company with the id of ${req.params.companyId}`});
         }
-
+        // Check if the company has reached its maximum slots
+        const companyBookingsCount = await Booking.countDocuments({ company: req.params.companyId });
+        if(companyBookingsCount > company.maxSlots){
+            return res.status(400).json({success: false, msg: `Company ${company.name} has reached its maximum number of interview slots`});
+        }
         //add user id to req.body
         req.body.user=req.user.id;
         //check for existed appt
@@ -69,6 +73,18 @@ exports.addBooking = async (req,res,next) => {
         //if the user is not an admin,they can create only 3 appts
         if(existedBooking.length>=3&&req.user.role !== 'admin'){
             return res.status(400).json({success:false,msg:`The user with ID ${req.user.id} has already made 3 bookings`});
+        }
+        //Check if the same date is already booked for this company
+        const existingAppointment = await Booking.findOne({
+            company: req.params.companyId,
+            apptDate: new Date(req.body.apptDate)
+        });
+        
+        if(existingAppointment) {
+            return res.status(400).json({
+                success: false,
+                msg: `An appointment for ${company.name} on this date and time already exists`
+            });
         }
         const booking = await Booking.create(req.body);
 
@@ -86,23 +102,52 @@ exports.addBooking = async (req,res,next) => {
 //access private
 exports.updateBooking = async (req,res,next) => {
     try{
+        // First, find the booking
         let booking = await Booking.findById(req.params.id);
-
         if(!booking){
             return res.status(404).json({success:false,msg:`No booking with the id of ${req.params.id}`});
         }
 
-        //make sure user is the apt owner
-        if(booking.user.toString()!==req.user.id&&req.user.role!=='admin'){
+        // Check authorization - do this early
+        if(booking.user.toString() !== req.user.id && req.user.role !== 'admin'){
             return res.status(401).json({success:false,msg:`User ${req.user.id} is not authorized to update this booking`});
         }
-        booking = await Booking.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});
 
-        res.status(200).json({success:true,data:booking});
+        // If we're changing the date, check for conflicts
+        if(req.body.apptDate) {
+            // Get the company info for this booking
+            const company = await Company.findById(booking.company);
+            
+            if(!company) {
+                return res.status(404).json({success:false, msg: 'Company not found'});
+            }
+
+            // Check if date is already booked (excluding this booking)
+            const existingAppointment = await Booking.findOne({
+                company: booking.company,
+                apptDate: new Date(req.body.apptDate),
+                _id: { $ne: req.params.id } // Exclude current booking from check
+            });
+            
+            if(existingAppointment) {
+                return res.status(400).json({
+                    success: false,
+                    msg: `An appointment for ${company.name} on this date and time already exists`
+                });
+            }
+        }
+
+        // Update the booking
+        booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({success: true, data: booking});
     }
     catch(err){
         console.log(err.stack);
-        return res.status(500).json({success:false,message:"Cannot update Booking"});
+        return res.status(500).json({success: false, message: "Cannot update Booking"});
     }
 };
 

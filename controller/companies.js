@@ -86,9 +86,19 @@ exports.getCompany = async (req,res,next) => {
 };
 
 exports.createCompany = async (req,res,next) => {
-    //console.log(req.body);
-    const company = await Compamy.create(req.body);
-    res.status(201).json({success:true,data:company});
+    try {
+        console.log('Creating company with data:', req.body);
+        
+        const company = await Company.create(req.body);
+        
+        res.status(201).json({success:true, data:company});
+    } catch (err) {
+        console.error('Create company error:', err.message);
+        res.status(400).json({
+            success: false,
+            error: err.message
+        });
+    }
 };
 
 exports.updateCompany = async (req,res,next) => {
@@ -115,5 +125,44 @@ exports.deleteCompany = async (req,res,next) => {
         
     } catch (err) {
         res.status(400).json({success:false});
+    }
+};
+/**
+ * @desc    Update maximum slots for a company
+ * @route   PUT /api/companies/:id/slots
+ * @access  Private/Admin
+ */
+exports.updateMaxSlots = async (req, res, next)=>{
+    try{
+        const {maxSlots} = req.body;
+        //validate input
+        if(!maxSlots|| !Number.isInteger(maxSlots) || maxSlots <1){
+            return res.status(400).json({
+                success: false,
+                error : 'Please provide a valid positive integer for maximum slots'
+            });
+        }
+
+        const company = await Company.findByIdAndUpdate(
+            req.params.id,
+            {maxSlots},
+            {new: true, runValidators: true}  
+        );
+        if(!company){
+            return res.status(404).json({
+                success: false,
+                error: `Company with id ${req.params.id} not found`
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: company
+        });
+    }catch (err) {
+        console.log(err.stack);
+        res.status(500).json({
+            success: false,
+            error: 'Server error updating maximum slots'
+        });
     }
 };
