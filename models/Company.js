@@ -25,7 +25,17 @@ const CompanySchema = new mongoose.Schema({
         required:[true,'Please add a postalcode'],
         maxlength:[50,'Postal Code can not be more than 5 digits']
     },
-    
+    website: {
+        type: String,
+        match: [
+          /^(https?:\/\/)?([\w\d-]+\.)+\w{2,}(\/.*)?$/,
+          'Please enter a valid URL'
+        ]
+      },
+      description: {
+        type: String,
+        maxlength: [500, 'Description can not be more than 500 characters']
+      },
     tel:{
         type:String,
     },
