@@ -65,6 +65,9 @@ app.use('/api/v1/auth', passwordReset);
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT,console.log('Server running in ',process.env.NODE_ENV,' mode on port ',PORT));
 
+const resume = require('./routes/resume');
+app.use('/api/v1/auth', resume);
+
 //handle unhandle promise rejections
 process.on('unhandleRejection',(err,promise)=>{
     console.log(`Error:${err.message}`);
