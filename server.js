@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const cookieParser = require('cookie-parser');
 const aiRoutes = require('./routes/aiController');
+
+
 //load var
 dotenv.config({path:'./config/config.env'});
 
@@ -56,6 +58,9 @@ app.use('/api/v1/auth',auth);
 
 const bookings = require('./routes/bookings');
 app.use('/api/v1/bookings',bookings);
+
+const passwordReset = require('./routes/passwordReset');
+app.use('/api/v1/auth', passwordReset);
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT,console.log('Server running in ',process.env.NODE_ENV,' mode on port ',PORT));
