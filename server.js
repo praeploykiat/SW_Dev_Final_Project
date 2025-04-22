@@ -68,6 +68,9 @@ const server = app.listen(PORT,console.log('Server running in ',process.env.NODE
 const resume = require('./routes/resume');
 app.use('/api/v1/auth', resume);
 
+const bookmarkRoutes = require('./routes/bookmark');
+app.use('/api/v1/bookmarks', bookmarkRoutes);
+
 //handle unhandle promise rejections
 process.on('unhandleRejection',(err,promise)=>{
     console.log(`Error:${err.message}`);
