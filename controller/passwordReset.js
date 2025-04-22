@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
+const fs = require('fs');
+const path = require('path');
 
 // @desc    Send password reset link
 // @route   POST /api/v1/auth/requestPasswordReset
@@ -26,11 +28,20 @@ exports.requestPasswordReset = async (req, res) => {
       },
     });
 
+    const filePath = path.join(__dirname, '../utils/resetPasswordEmail.html');
+    let emailHTML = fs.readFileSync(filePath, 'utf8');
+
+    // Replace placeholders
+    emailHTML = emailHTML
+    .replace('{{name}}', user.name)
+    .replace('{{resetURL}}', resetURL);
+
     const mailOptions = {
-      to: user.email,
-      from: process.env.EMAIL_USER,
-      subject: 'Password Reset Request',
-      text: `Click the link below to reset your password:\n\n${resetURL}`
+        to: user.email,
+        from: process.env.EMAIL_USER,
+        subject: 'Reset Your Password - Online Job Fair',
+        //text: `Use this link as the PUT request URL in Postman to reset your password:\n\n${resetURL}\n\nSend a JSON body like:\n{\n  "password": "yourNewPasswordHere"\n}`
+        html: emailHTML
     };
 
     await transporter.sendMail(mailOptions);
