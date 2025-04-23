@@ -8,7 +8,7 @@ const auth = require('./routes/auth');
 const bookings = require('./routes/bookings');
 const aiRoutes = require('./routes/aiController');
 const passwordReset = require('./routes/passwordReset');
-const resume = require('./routes/resume');
+const resume = require('./routes/resume.js');
 const bookmark = require('./routes/bookmark');
 
 // Load environment variables

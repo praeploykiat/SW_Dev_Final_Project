@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const User = require('../models/User');
 
-// ✅ Upload or Update Resume
 exports.updateResume = async (req, res) => {
   try {
     if (!req.file) {
@@ -10,39 +9,23 @@ exports.updateResume = async (req, res) => {
     }
 
     const user = await User.findById(req.user.id);
-
-    // // ✅ Delete old resume if it exists
-    // if (user.resume && fs.existsSync(user.resume)) {
-    //   fs.unlinkSync(user.resume);
-    // }
-
     user.resume = req.file.path;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Resume uploaded successfully',
-      resume: user.resume
-    });
+    res.status(200).json({ success: true, message: 'Resume uploaded successfully', resume: user.resume });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Upload failed' });
   }
 };
 
-// ✅ Delete Resume
 exports.deleteResume = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-
-    if (!user.resume) {
-      return res.status(400).json({ success: false, message: 'No resume to delete' });
-    }
+    if (!user.resume) return res.status(400).json({ success: false, message: 'No resume to delete' });
 
     const resumePath = path.resolve(user.resume);
-    if (fs.existsSync(resumePath)) {
-      fs.unlinkSync(resumePath);
-    }
+    if (fs.existsSync(resumePath)) fs.unlinkSync(resumePath);
 
     user.resume = null;
     await user.save();
@@ -54,14 +37,10 @@ exports.deleteResume = async (req, res) => {
   }
 };
 
-// ✅ Get Resume
 exports.getResume = async (req, res) => {
   try {
     const filePath = path.join(__dirname, '..', 'uploads/resumes', `resume-${req.user.id}.pdf`);
-
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ success: false, message: 'No resume uploaded yet' });
-    }
+    if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'No resume uploaded yet' });
 
     res.sendFile(path.resolve(filePath));
   } catch (err) {
