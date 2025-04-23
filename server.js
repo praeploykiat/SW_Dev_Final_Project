@@ -32,6 +32,24 @@ app.use('/api/v1/auth', passwordReset);
 app.use('/api/v1/auth', resume);
 app.use('/api/v1/bookmarks', bookmark);
 
+// Global error handler — this should be placed **AFTER** all routes
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+  
+    if (err.name === 'MulterError') {
+      // e.g. too many files, unexpected field
+      return res.status(400).json({
+        success: false,
+        message: `Upload error: ${err.message}`
+      });
+    }
+  
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Server Error'
+    });
+  });
+  
 // Start the server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
