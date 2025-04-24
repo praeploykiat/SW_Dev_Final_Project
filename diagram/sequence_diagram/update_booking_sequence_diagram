@@ -18,7 +18,7 @@ BookingsDB --> modelBooking: Booking document
 modelBooking --> controllerBookings: booking data
 note over controllerBookings: Verify booking exists and user is authorized (admin or owner)
 alt Not found or unauthorized
-    controllerBookings -> client: 403 Forbidden or 404 Not Found
+    controllerBookings -> client: 401 Unauthorized or 404 Not Found
 else Success
     note over controllerBookings
         Validate new data (e.g. date is within allowed range)
