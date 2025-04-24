@@ -61,11 +61,30 @@ exports.addBooking = async (req,res,next) => {
         if(!company){
             return res.status(404).json({success:false,msg:`No company with the id of ${req.params.companyId}`});
         }
-        // Check if the company has reached its maximum slots
-        const companyBookingsCount = await Booking.countDocuments({ company: req.params.companyId });
-        if(companyBookingsCount > company.maxSlots){
-            return res.status(400).json({success: false, msg: `Company ${company.name} has reached its maximum number of interview slots`});
+
+        const requestedDate = new Date(req.body.apptDate);
+        
+        const startOfDay = new Date(requestedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const endOfDay = new Date(requestedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        const bookingsOnThisDate = await Booking.countDocuments({
+            company: req.params.companyId,
+            apptDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        });
+
+        if(bookingsOnThisDate >= company.maxSlots) {
+            return res.status(400).json({
+                success: false, 
+                msg: `Company ${company.name} has reached its maximum number of interview slots for ${startOfDay.toDateString()}`
+            });
         }
+
         //add user id to req.body
         req.body.user=req.user.id;
         //check for existed appt
