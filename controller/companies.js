@@ -1,4 +1,6 @@
 const Company = require('../models/Company');
+const Booking = require('../models/Booking.js');
+const Bookmark = require('../models/Bookmark');
 
 exports.getCompanies = async (req,res,next) => {
         let query;
@@ -118,11 +120,13 @@ exports.deleteCompany = async (req,res,next) => {
         const company = await Company.findById(req.params.id);
         //const company = await Company.findByIdAndDelete(req.params.id);
         if(!company){
-            return res.status(400).json({success:false,msg:`Bootcamp not found with id of ${req.params.id}`});
+            return res.status(400).json({success:false,msg:`Company not found with id of ${req.params.id}`});
         }
-        await company.deleteOne();
-        res.status(200).json({success:true,data:{}});
+        await Booking.deleteMany({ company: req.params.id });
+        await Bookmark.deleteMany({ company: req.params.id });
+        await Company.deleteOne({_id:req.params.id});
         
+        res.status(200).json({success:true,data:{}})
     } catch (err) {
         res.status(400).json({success:false});
     }
