@@ -1,0 +1,42 @@
+@startuml Auth (Register/Login/Logout)
+
+title "Auth Flow: Register, Login, Logout"
+
+participant "Client" as client
+participant "<<Node.js>>\n:server" as server
+participant "<<router>>\n:auth" as routerAuth
+participant "<<controller>>\n:auth" as controllerAuth
+participant "<<model>>\n:User" as modelUser
+database "<<MongoDB>>\nusers" as usersDB
+
+== Register ==
+client -> server ++ : POST /api/v1/auth/register
+server -> routerAuth ++ : router.post('/register', register)
+routerAuth -> controllerAuth ++ : register(req, res)
+controllerAuth -> modelUser ++ : User.create(req.body)
+modelUser -> usersDB ++ : insert new user
+usersDB --> modelUser -- : newUser
+controllerAuth -> modelUser ++ : getSignedJwtToken()
+modelUser --> controllerAuth -- : jwt token
+controllerAuth -> client -- : 201 Created + Token
+
+== Login ==
+client -> server ++ : POST /api/v1/auth/login
+server -> routerAuth ++ : router.post('/login', login)
+routerAuth -> controllerAuth ++ : login(req, res)
+controllerAuth -> modelUser ++ : User.findOne({ email }).select('+password')
+modelUser -> usersDB ++ : find user by email
+usersDB --> modelUser -- : userDoc
+controllerAuth -> modelUser ++ : matchPassword()
+modelUser --> controllerAuth -- : true/false
+controllerAuth -> modelUser ++ : getSignedJwtToken()
+modelUser --> controllerAuth -- : jwt token
+controllerAuth -> client -- : 200 OK + Token
+
+== Logout ==
+client -> server ++ : GET /api/v1/auth/logout
+server -> routerAuth ++ : router.get('/logout', logout)
+routerAuth -> controllerAuth ++ : logout(req, res)
+controllerAuth -> client -- : set cookie token='none', return 200
+
+@enduml

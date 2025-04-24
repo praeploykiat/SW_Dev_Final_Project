@@ -1,0 +1,29 @@
+@startuml Add Booking (POST)
+
+title "Add Booking (POST)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllerBookings
+participant "<<model>>\n:Booking" as modelBooking
+database "<<MongoDB>>\n:bookings" as BookingsDB
+
+client -> server: POST /api/v1/bookings (new booking data)
+server -> routerBookings: Route POST /bookings++
+routerBookings -> controllerBookings: addBooking(req, res)
+note over controllerBookings
+    Validate input (date format, required fields) and business rules:
+    - User has fewer than 3 bookings
+    - Selected slot is available
+end note
+alt Validation fails or slot unavailable
+    controllerBookings -> client: 400 Bad Request (error message)
+else Success
+    controllerBookings -> modelBooking: create(new Booking)
+    modelBooking -> BookingsDB: Insert booking document
+    BookingsDB --> modelBooking: Booking saved
+    modelBooking --> controllerBookings: (Booking created)
+    controllerBookings -> client: 201 Created (booking details)
+end
+@enduml

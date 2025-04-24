@@ -1,0 +1,27 @@
+@startuml View Booking(s) (GET)
+
+title "View Booking(s) (GET)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllerBookings
+participant "<<model>>\n:Booking" as modelBooking
+database "<<MongoDB>>\n:bookings" as BookingsDB
+
+client -> server: GET /api/v1/bookings/{bookingId?}
+server -> routerBookings: Route GET /bookings/:id?
+routerBookings -> controllerBookings: getBookings(req, res)
+alt User is admin
+    controllerBookings -> modelBooking: find(query)
+    note right of controllerBookings: Admin can retrieve any booking or list all
+else User is regular
+    controllerBookings -> modelBooking: find({ user: req.user.id, ... })
+    note right of controllerBookings: User can only retrieve own booking(s)
+end
+modelBooking -> BookingsDB: Query booking(s)
+BookingsDB --> modelBooking: Booking data
+modelBooking --> controllerBookings: result
+note over controllerBookings: If no booking found (or access denied), return 404
+controllerBookings -> client: 200 OK (booking details or list)
+@enduml

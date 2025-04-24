@@ -1,0 +1,33 @@
+@startuml Update Booking (PUT)
+
+title "Update Booking (PUT)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllerBookings
+participant "<<model>>\n:Booking" as modelBooking
+database "<<MongoDB>>\n:bookings" as BookingsDB
+
+client -> server: PUT /api/v1/bookings/{bookingId} (updated data)
+server -> routerBookings: Route PUT /bookings/:id
+routerBookings -> controllerBookings: updateBooking(req, res)
+controllerBookings -> modelBooking: findById(bookingId)
+modelBooking -> BookingsDB: Find booking by ID
+BookingsDB --> modelBooking: Booking document
+modelBooking --> controllerBookings: booking data
+note over controllerBookings: Verify booking exists and user is authorized (admin or owner)
+alt Not found or unauthorized
+    controllerBookings -> client: 403 Forbidden or 404 Not Found
+else Success
+    note over controllerBookings
+        Validate new data (e.g. date is within allowed range)
+        Check slot availability if details changed
+    end note
+    controllerBookings -> modelBooking: updateOne({_id: bookingId}, newData)
+    modelBooking -> BookingsDB: Update booking document
+    BookingsDB --> modelBooking: Updated document
+    modelBooking --> controllerBookings: updated booking
+    controllerBookings -> client: 200 OK (updated booking details)
+end
+@enduml

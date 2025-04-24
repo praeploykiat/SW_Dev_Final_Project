@@ -1,0 +1,29 @@
+@startuml Delete Booking (DELETE)
+
+title "Delete Booking (DELETE)"
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:bookings" as routerBookings
+participant "<<controllers>>\n:bookings" as controllerBookings
+participant "<<model>>\n:Booking" as modelBooking
+database "<<MongoDB>>\n:bookings" as BookingsDB
+
+client -> server: DELETE /api/v1/bookings/{bookingId}
+server -> routerBookings: Route DELETE /bookings/:id
+routerBookings -> controllerBookings: deleteBooking(req, res)
+controllerBookings -> modelBooking: findById(bookingId)
+modelBooking -> BookingsDB: Find booking by ID
+BookingsDB --> modelBooking: Booking document
+modelBooking --> controllerBookings: booking data
+note over controllerBookings: Verify booking exists and user is authorized (admin or owner)
+alt Not found or unauthorized
+    controllerBookings -> client: 403 Forbidden or 404 Not Found
+else Success
+    controllerBookings -> modelBooking: deleteOne({_id: bookingId})
+    modelBooking -> BookingsDB: Remove booking document
+    BookingsDB --> modelBooking: Deletion result
+    modelBooking --> controllerBookings: (deleted)
+    controllerBookings -> client: 200 OK (deletion success confirmation)
+end
+@enduml

@@ -1,0 +1,21 @@
+@startuml View Company List (GET)
+
+title "View Company List (GET)"
+
+participant "Client" as client
+participant "<<Node.js>>\n:server" as server
+participant "<<router>>\n:companies" as routerCompanies
+participant "<<controller>>\n:companies" as controllerCompanies
+participant "<<model>>\n:Company" as modelCompany
+database "<<MongoDB>>\ncompanies" as companiesDB
+
+client -> server ++ : GET /api/v1/companies
+server -> routerCompanies ++ : router.get('/', getCompanies)
+routerCompanies -> controllerCompanies ++ : getCompanies(req, res)
+controllerCompanies -> modelCompany ++ : Company.find(...).populate('bookings')
+modelCompany -> companiesDB ++ : query with filters + pagination
+companiesDB --> modelCompany -- : companyList[]
+controllerCompanies --> routerCompanies -- : companyList[]
+routerCompanies -> client -- : 200 OK + data
+
+@enduml
