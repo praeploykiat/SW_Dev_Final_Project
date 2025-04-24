@@ -1,0 +1,128 @@
+@startuml "Online Job Fair Registration System"
+
+skinparam class {
+  BackgroundColor #DCEBFC
+  BorderColor #2C5AA0
+  ArrowColor #2C5AA0
+  FontSize 12
+}
+
+skinparam stereotypeCBackgroundColor #ADD1FF
+skinparam packageBackgroundColor #FFFFFF
+
+' Application Service
+class JobFairService <<Application>> {
+  /api/v1
+}
+
+' Resource: Auth
+class Auth <<Resource>> {
+  <<Path>> /api/v1/auth
+  <<POST>> + register(name, telephone, email, password): User
+  <<POST>> + login(email, password): Token
+  <<GET>> + logout(): void
+  <<GET>> + getMe(): User
+}
+
+' Resource: Company
+class Company <<Resource>> {
+  <<Path>> /api/v1/companies
+  - id: ObjectID
+  - name: String
+  - address: String
+  - district: String
+  - province: String
+  - postalcode: String
+  - website: String
+  - description: String
+  - tel: String
+  - maxSlots: Number
+  <<GET>> + getCompanies(): Company[]
+  <<GET>> + getCompany(id): Company
+  <<POST>> + createCompany(): Company
+  <<PUT>> + updateCompany(id): Company
+  <<DELETE>> + deleteCompany(id): void
+}
+
+' Resource: Booking
+class Booking <<Resource>> {
+  <<Path>> /api/v1/bookings
+  - id: ObjectID
+  - apptDate: Date
+  - user: ObjectID
+  - company: ObjectID
+  - createAt: Date
+  <<GET>> + getBookings(): Booking[]
+  <<GET>> + getBooking(id): Booking
+  <<POST>> + addBooking(): Booking
+  <<PUT>> + updateBooking(id): Booking
+  <<DELETE>> + deleteBooking(id): void
+}
+
+' Representation: User
+class UserModel <<Representation>> {
+  - id: ObjectID
+  - name: String
+  - telephone: String
+  - email: String
+  - password: String
+  - role: String
+  - resetPasswordToken: String
+  - resetPasswordExpire: Date
+  - resume: String
+  - createdAt: Date
+  + getSignedJwtToken(): String
+  + matchPassword(password): Boolean
+}
+
+' Representation: Company
+class CompanyModel <<Representation>> {
+  - id: ObjectID
+  - name: String
+  - address: String
+  - district: String
+  - province: String
+  - postalcode: String
+  - website: String
+  - description: String
+  - tel: String
+  - maxSlots: Number
+}
+
+' Representation: Booking
+class BookingModel <<Representation>> {
+  - id: ObjectID
+  - apptDate: Date
+  - user: ObjectID
+  - company: ObjectID
+  - createAt: Date
+}
+
+' Middleware
+class AuthMiddleware <<Middleware>> {
+  + protect(req, res, next): void
+  + authorize(roles[]): Function
+}
+
+' Service layer relationships
+JobFairService --> Auth : uses >
+JobFairService --> Company : uses >
+JobFairService --> Booking : uses >
+
+' Resource to Model relationships  
+Auth --> UserModel : <<use>> >
+Company --> CompanyModel : <<use>> >
+Booking --> BookingModel : <<use>> >
+
+' Cross-resource and API relationships
+Booking --> Company : <<use>> /api/v1/companies/{companyId}/bookings {GET, POST} >
+Booking --> UserModel : <<use>> >
+
+' Middleware relationships
+Auth --> AuthMiddleware : uses >
+
+' Domain model relationships
+UserModel "1" -- "0..3" BookingModel : creates >
+CompanyModel "1" -- "*" BookingModel : hosts >
+
+@enduml
