@@ -1,0 +1,59 @@
+@startuml Online Job Fair Registration
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor "User" as user
+actor "Registered User" as regUser
+actor "Admin" as admin
+
+rectangle "Online Job Fair Registration System" {
+  usecase "Register" as UC1
+  usecase "Login" as UC2
+  usecase "Logout" as UC3
+  usecase "Book Interview Session" as UC4
+  usecase "View Own Bookings" as UC5
+  usecase "Edit Own Booking" as UC6
+  usecase "Delete Own Booking" as UC7
+  usecase "View Any Booking" as UC8
+  usecase "Edit Any Booking" as UC9
+  usecase "Delete Any Booking" as UC10
+  usecase "View Company List" as UC11
+}
+
+user --> UC1
+user --> UC2
+
+regUser --|> user
+regUser --> UC3
+regUser --> UC4
+regUser --> UC5
+regUser --> UC6
+regUser --> UC7
+regUser --> UC11
+
+admin --|> regUser
+admin --> UC8
+admin --> UC9
+admin --> UC10
+
+note right of UC4
+  Limited to 3 bookings max
+  Only during May 10-13, 2022
+end note
+
+note right of UC11
+  Company info includes:
+  - name
+  - address
+  - district
+  - province
+  - postalcode
+  - website
+  - description
+  - telcan 
+  - maxSlots
+  - createdAt
+end note
+
+@enduml
