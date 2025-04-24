@@ -6,7 +6,7 @@ const Company = require('../models/Company');
 //access private
 exports.getBookings = async(req,res,next)=>{
     let query;
-    //General users can see only their own appts!
+    //General users can see only their own bookings!
     if(req.user.role !== 'admin'){
         query=Booking.find({user:req.user.id}).populate({path:'company',select:'name province tel'});
     }
@@ -83,17 +83,25 @@ exports.addBooking = async (req,res,next) => {
         if(existingAppointment) {
             return res.status(400).json({
                 success: false,
-                msg: `An appointment for ${company.name} on this date and time already exists`
+                msg: `A Booking for ${company.name} on this date already exists`
             });
         }
         const booking = await Booking.create(req.body);
 
         res.status(200).json({success:true,data:booking});
     }
-    catch(err){
+    catch (err) {
         console.log(err.stack);
-        return res.status(500).json({success:false,message:"Cannot create Booking"});
-    }
+    
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: Object.values(err.errors).map(val => val.message).join(', ')
+            });
+        }
+    
+        return res.status(500).json({ success: false, message: "Cannot create Booking" });
+    }    
 };
 
 
