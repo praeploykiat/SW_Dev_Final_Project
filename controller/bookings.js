@@ -105,6 +105,24 @@ exports.addBooking = async (req,res,next) => {
         //         msg: `A Booking for ${company.name} on this date already exists`
         //     });
         // }
+
+        // Check if the same user already booked this company on the same date
+        const duplicateUserBooking = await Booking.findOne({
+            company: req.params.companyId,
+            user: req.user.id,
+            apptDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        });
+
+        if (duplicateUserBooking) {
+            return res.status(400).json({
+                success: false,
+                msg: `You have already booked an interview with ${company.name} on ${requestedDate.toDateString()}`
+            });
+        }
+
         const booking = await Booking.create(req.body);
 
         res.status(200).json({success:true,data:booking});
