@@ -140,46 +140,48 @@ exports.updateBooking = async (req,res,next) => {
             return res.status(401).json({success:false,msg:`User ${req.user.id} is not authorized to update this booking`});
         }
 
+        // If we're changing the date, check for conflicts
         if(req.body.apptDate) {
-            // Only check for conflicts if the date is actually changing
             const currentDate = new Date(booking.apptDate);
             const newDate = new Date(req.body.apptDate);
             
-            // If dates are the same, return an error
             if(currentDate.toDateString() === newDate.toDateString()) {
                 return res.status(400).json({
                     success: false,
-                    msg: `Please select a different date for your booking update`
+                    msg: `You must choose a different date when updating your booking`
                 });
-            } else {
-                const company = await Company.findById(booking.company);
-                
-                if(!company) {
-                    return res.status(404).json({success:false, msg: 'Company not found'});
-                }
+            }
             
-                const requestedDate = new Date(req.body.apptDate);
-        
-                // Check if another booking exists for the same company on the same day
-                const existingAppointment = await Booking.findOne({
-                    company: booking.company,
-                    _id: { $ne: req.params.id }, // Exclude current booking
-                    // Compare only year, month, day
-                    $expr: {
-                        $and: [
-                            { $eq: [{ $year: "$apptDate" }, requestedDate.getFullYear()] },
-                            { $eq: [{ $month: "$apptDate" }, requestedDate.getMonth() + 1] }, // MongoDB months are 1-12
-                            { $eq: [{ $dayOfMonth: "$apptDate" }, requestedDate.getDate()] }
-                        ]
-                    }
+            
+            const company = await Company.findById(booking.company);
+            
+            if(!company) {
+                return res.status(404).json({success:false, msg: 'Company not found'});
+            }
+            
+           
+            const startOfDay = new Date(newDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            
+            const endOfDay = new Date(newDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            
+            // Count bookings on the new date (excluding this booking)
+            const bookingsOnNewDate = await Booking.countDocuments({
+                company: booking.company,
+                apptDate: {
+                    $gte: startOfDay,
+                    $lte: endOfDay
+                },
+                _id: { $ne: req.params.id } // Exclude current booking
+            });
+            
+            // Now check if max slots would be exceeded
+            if(bookingsOnNewDate >= company.maxSlots) {
+                return res.status(400).json({
+                    success: false, 
+                    msg: `Company ${company.name} has reached its maximum number of interview slots for ${startOfDay.toDateString()}`
                 });
-                
-                if(existingAppointment) {
-                    return res.status(400).json({
-                        success: false,
-                        msg: `An appointment for ${company.name} on this date already exists`
-                    });
-                }
             }
         }
 
