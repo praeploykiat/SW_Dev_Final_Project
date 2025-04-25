@@ -93,19 +93,6 @@ exports.addBooking = async (req,res,next) => {
         if(existedBooking.length>=3&&req.user.role !== 'admin'){
             return res.status(400).json({success:false,msg:`The user with ID ${req.user.id} has already made 3 bookings`});
         }
-        // //Check if the same date is already booked for this company
-        // const existingAppointment = await Booking.findOne({
-        //     company: req.params.companyId,
-        //     apptDate: new Date(req.body.apptDate)
-        // });
-        
-        // if(existingAppointment) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         msg: `A Booking for ${company.name} on this date already exists`
-        //     });
-        // }
-
         // Check if the same user already booked this company on the same date
         const duplicateUserBooking = await Booking.findOne({
             company: req.params.companyId,
